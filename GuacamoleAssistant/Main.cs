@@ -91,8 +91,8 @@ namespace GuacamoleAssistant
         KeyModifiers userKeyModifiers4 = KeyModifiers.Control;
         Keys userKey4 = Keys.F12;
 
-        KeyModifiers userKeyModifiers5 = KeyModifiers.Control | KeyModifiers.Shift;
-        Keys userKey5 = Keys.OemQuestion;
+        KeyModifiers userKeyModifiers5 = KeyModifiers.Control;
+        Keys userKey5 = Keys.OemPipe;
 
         //InputSimulator inps;
 
