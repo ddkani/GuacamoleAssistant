@@ -13,12 +13,12 @@ namespace GuacamoleAssistant
         private const int KEYEVENTF_EXTENDEDKEY = 1;
         private const int KEYEVENTF_KEYUP = 2;
 
-        public static void KeyDown(Keys vKey)
+        public static void KeyDown(int vKey)
         {
             keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY, 0);
         }
 
-        public static void KeyUp(Keys vKey)
+        public static void KeyUp(int vKey)
         {
             keybd_event((byte)vKey, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
         }

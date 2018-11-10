@@ -19,6 +19,9 @@ namespace GuacamoleAssistant
             InitializeComponent();
         }
 
+        [DllImport("user32")]
+        public static extern IntPtr GetForegroundWindow();
+
         [DllImport("user32.dll")]
         public static extern bool RegisterHotKey(IntPtr hWnd, int id, KeyModifiers fsModifiers, Keys vk);
 
@@ -27,6 +30,9 @@ namespace GuacamoleAssistant
 
         const int HOTKEY_ID1 = 31197; //Any number to use to identify the hotkey instance
         const int HOTKEY_ID2 = 31198; //Any number to use to identify the hotkey instance
+        const int HOTKEY_ID3 = 31199;
+        const int HOTKEY_ID4 = 31200;
+        const int HOTKEY_ID5 = 31201;
         const int WM_HOTKEY = 0x0312;
 
         [DllImport("shell32.dll", EntryPoint = "#61", CharSet = CharSet.Unicode)]
@@ -44,16 +50,49 @@ namespace GuacamoleAssistant
             Alt = 1,
             Control = 2,
             Shift = 4,
-            Windows = 8
+            Windows = 8,
+            NoRepeat = 16384
         }
 
-        // send AltTab
+        //http://ldg119.tistory.com/234
+
+        int VK_HANGULE = 0x15;
+        int VK_LCONTROL = 0xA2;
+        int VK_LEFT = 0x25;
+        int VK_RIGHT = 0x27;
+        int VK_LWIN = 0x5C;
+
+        void ToggleKey(int key)
+        {
+            KeyboardSend.KeyDown(key);
+            KeyboardSend.KeyUp(key);
+        }
+
+        private void ShowToolTip(object sender, string message)
+        {
+            //new ToolTip().Show(message, this, Cursor.Position.X - this.Location.X, Cursor.Position.Y - this.Location.Y, 1000);
+            new ToolTip().Show(message, this, Screen.PrimaryScreen.WorkingArea.Width, 
+                Screen.PrimaryScreen.WorkingArea.Height, 500);
+        }
+
+        // send alttab
         KeyModifiers userKeyModifiers1 = KeyModifiers.Control;
         Keys userKey1 = Keys.OemQuestion;
 
-        // send Win
-        KeyModifiers userKeyModifiers2 = KeyModifiers.Control | KeyModifiers.Alt;
-        Keys userKey2 = Keys.M;
+        // HanEng switch
+        KeyModifiers userKeyModifiers2 = KeyModifiers.Shift;
+        Keys userKey2 = Keys.Space;
+
+        // left vd
+        KeyModifiers userKeyModifiers3 = KeyModifiers.Control;
+        Keys userKey3 = Keys.F11;
+
+        // right vd
+        KeyModifiers userKeyModifiers4 = KeyModifiers.Control;
+        Keys userKey4 = Keys.F12;
+
+        KeyModifiers userKeyModifiers5 = KeyModifiers.Control | KeyModifiers.Shift;
+        Keys userKey5 = Keys.OemQuestion;
 
         //InputSimulator inps;
 
@@ -70,20 +109,47 @@ namespace GuacamoleAssistant
                     {
                         // Send Alt-Tab 
                         SendKeys.Send("%{Tab}");
+                        //ShowToolTip(this, "Show Alt+Tab Window");
                     }
 
                     if ((userKeyModifiers2) == modifier && userKey2 == key)
                     {
-                        RunFileDlg(IntPtr.Zero, IntPtr.Zero, null, null, null, 0);
-                        //KeyboardSend.KeyDown(Keys.LWin);
-                        //KeyboardSend.KeyDown(Keys.R);
-                        //KeyboardSend.KeyUp(Keys.R);
-                        //KeyboardSend.KeyUp(Keys.LWin);
+                        ToggleKey(VK_HANGULE);
+                        //ShowToolTip(this, "Switch IME (Han/Eng)");
+                    }
 
-                        //Thread.Sleep(100);
-                        // InputSimulator
-                        //inps.Keyboard.KeyPress(VirtualKeyCode.LWIN, VirtualKeyCode.VK_E);
-                        //inps.SimulateModifiedKeyStroke(VirtualKeyCode.LWIN, VirtualKeyCode.VK_E);
+                    if ((userKeyModifiers3) == modifier && userKey3 == key)
+                    {
+                        // Send {Control down}{LWin down}{Left}{Control up}{LWin up}
+                        KeyboardSend.KeyDown(VK_LCONTROL);
+                        KeyboardSend.KeyDown(VK_LWIN);
+                        KeyboardSend.KeyDown(VK_LEFT);
+                        KeyboardSend.KeyUp(VK_LCONTROL);
+                        KeyboardSend.KeyUp(VK_LWIN);
+                        KeyboardSend.KeyUp(VK_LEFT);
+                        //ShowToolTip(this, "Move Virtual Desktop to LEFT");
+
+                        //MessageBox.Show("");
+
+                    }
+
+                    if ((userKeyModifiers4) == modifier && userKey4 == key)
+                    {
+                        // Send {Control down}{LWin down}{Left}{Control up}{LWin up}
+                        KeyboardSend.KeyDown(VK_LCONTROL);
+                        KeyboardSend.KeyDown(VK_LWIN);
+                        KeyboardSend.KeyDown(VK_RIGHT);
+                        KeyboardSend.KeyUp(VK_LCONTROL);
+                        KeyboardSend.KeyUp(VK_LWIN);
+                        KeyboardSend.KeyUp(VK_RIGHT);
+                        //ShowToolTip(this, "Move Virtual Desktop to RIGHT");
+
+                        //MessageBox.Show("");
+                    }
+
+                    if ((userKeyModifiers5) == modifier && userKey5 == key)
+                    {
+                        RunFileDlg(IntPtr.Zero, IntPtr.Zero, null, null, null, 0);
                     }
 
                     break;
@@ -97,6 +163,9 @@ namespace GuacamoleAssistant
             //inps = new InputSimulator();
             RegisterHotKey(this.Handle, HOTKEY_ID1, userKeyModifiers1, userKey1);
             RegisterHotKey(this.Handle, HOTKEY_ID2, userKeyModifiers2, userKey2);
+            RegisterHotKey(this.Handle, HOTKEY_ID3, userKeyModifiers3, userKey3);
+            RegisterHotKey(this.Handle, HOTKEY_ID4, userKeyModifiers4, userKey4);
+            RegisterHotKey(this.Handle, HOTKEY_ID4, userKeyModifiers5, userKey5);
 
             notifyIcon.Visible = true;
         }
@@ -105,6 +174,9 @@ namespace GuacamoleAssistant
         {
             UnregisterHotKey(this.Handle, HOTKEY_ID1);
             UnregisterHotKey(this.Handle, HOTKEY_ID2);
+            UnregisterHotKey(this.Handle, HOTKEY_ID3);
+            UnregisterHotKey(this.Handle, HOTKEY_ID4);
+            UnregisterHotKey(this.Handle, HOTKEY_ID5);
         }
 
         private void btnHide_Click(object sender, EventArgs e)
@@ -119,7 +191,15 @@ namespace GuacamoleAssistant
 
         private void button1_Click(object sender, EventArgs e)
         {
-            SendKeys.Send("%{Tab}");
+            //SendKeys.Send("%{Tab}");
+            //ToggleKey(VK_LWIN);
+            KeyboardSend.KeyDown(VK_LCONTROL);
+            KeyboardSend.KeyDown(VK_LWIN);
+            KeyboardSend.KeyDown(VK_RIGHT);
+            KeyboardSend.KeyUp(VK_LCONTROL);
+            KeyboardSend.KeyUp(VK_LWIN);
+            KeyboardSend.KeyUp(VK_RIGHT);
+
         }
     }
 }
